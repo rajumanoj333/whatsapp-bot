@@ -1,5 +1,5 @@
 """
-CareerG1 WhatsApp Marketing Bot
+Antz.ai WhatsApp Marketing Bot
 Production-ready webhook bot using Evolution API + FastAPI
 """
 
@@ -24,65 +24,68 @@ API_KEY = os.getenv("EVOLUTION_API_KEY", "")
 INSTANCE = os.getenv("INSTANCE_NAME", "")
 BOT_NUMBER = os.getenv("BOT_NUMBER", "")  # Your WhatsApp number (without +)
 
-app = FastAPI(title="CareerG1 WhatsApp Bot", version="1.0.0")
+app = FastAPI(title="Antz.ai WhatsApp Bot", version="1.0.0")
 
 # --- In-memory conversation state (use Redis/DB for multi-instance) ---
-# State per user: {phone: {"step": "...", "data": {...}, "last_seen": "..."}}
 conversations = {}
 
-# --- Product catalog / marketing messages ---
+# --- Antz.ai Marketing Messages ---
 WELCOME_MSG = (
-    "Hey there! Welcome to *CareerG1* - Your AI-Powered Career Guidance Platform!\n\n"
-    "We help students discover the right career path with personalized AI guidance.\n\n"
+    "Hey there! Welcome to *Antz.ai* - Build Your AI Workforce!\n\n"
+    "We transform traditional businesses into autonomous enterprises "
+    "using advanced AI Agents. Scale operations and unlock unprecedented efficiency.\n\n"
     "What would you like to know?\n\n"
-    "1. About CareerG1\n"
-    "2. Our Features\n"
-    "3. Pricing\n"
-    "4. Book a Free Demo\n"
-    "5. Talk to Support\n\n"
+    "1. About Antz.ai\n"
+    "2. Our Solutions\n"
+    "3. How It Works\n"
+    "4. Book a Free Consultation\n"
+    "5. Talk to Our Team\n\n"
     "Just reply with the number or type your question!"
 )
 
 ABOUT_MSG = (
-    "*About CareerG1*\n\n"
-    "CareerG1 is an AI-powered career guidance platform that helps students:\n\n"
-    "- Discover their ideal career path\n"
-    "- Get personalized college recommendations\n"
-    "- Access AI-driven aptitude assessments\n"
-    "- Connect with mentors and counselors\n\n"
-    "We've helped 10,000+ students find their perfect career!\n\n"
-    "Reply *2* for features, *4* to book a demo, or ask anything!"
+    "*About Antz.ai*\n\n"
+    "We test emerging AI tools, identify practical applications, and guide clients "
+    "toward solutions that deliver *measurable results* - not just impressive demos.\n\n"
+    "*Why Enterprises Work with Antz:*\n\n"
+    "- *Rapid Deployment* - Concept to production-ready systems within weeks\n"
+    "- *Trusted Security* - Data protection & privacy integrated throughout\n"
+    "- *Extended Partner* - Ongoing collaboration to find new automation opportunities\n\n"
+    "Reply *2* for solutions, *4* to book a consultation, or ask anything!"
 )
 
-FEATURES_MSG = (
-    "*CareerG1 Features*\n\n"
-    "- AI Career Assessment & RIASEC Test\n"
-    "- Personalized College Recommendations\n"
-    "- Entrance Exam Preparation Guides\n"
-    "- 1-on-1 Mentorship Sessions\n"
-    "- Resume Builder & Interview Prep\n"
-    "- Real-time Application Tracking\n\n"
-    "Ready to get started? Reply *4* to book a free demo!"
+SOLUTIONS_MSG = (
+    "*Antz.ai Solutions*\n\n"
+    "- *AI Agents* - Autonomous workforce that handles complex tasks\n"
+    "- *Process Automation* - Streamline operations end-to-end\n"
+    "- *Data Intelligence* - Turn your data into actionable insights\n"
+    "- *Enterprise Consulting* - Strategic AI transformation roadmap\n\n"
+    "Ready to transform your business? Reply *4* to book a free consultation!"
 )
 
-PRICING_MSG = (
-    "*CareerG1 Plans*\n\n"
-    "*Free Plan* - Basic career assessment\n"
-    "*Pro Plan* - Full AI guidance + mentorship\n"
-    "*Premium Plan* - Everything + priority support\n\n"
-    "Reply *4* to book a free demo and we'll find the best plan for you!"
+JOURNEY_MSG = (
+    "*The Journey to Autonomy* - Our 4-Phase Process\n\n"
+    "*Phase 1: Discovery*\n"
+    "In-depth business analysis to find high-impact automation candidates\n\n"
+    "*Phase 2: Strategy*\n"
+    "Custom agentic architecture designed for your specific objectives\n\n"
+    "*Phase 3: Execution*\n"
+    "Agent development and seamless system integration\n\n"
+    "*Phase 4: Extended Partnership*\n"
+    "Continuous improvement and new automation identification\n\n"
+    "Reply *4* to start your journey today!"
 )
 
-DEMO_START_MSG = (
-    "Awesome! Let's book your *free demo*.\n\n"
+CONSULTATION_START_MSG = (
+    "Great choice! Let's book your *free AI consultation*.\n\n"
     "I just need a few details. Let's start:\n\n"
     "What is your *full name*?"
 )
 
 SUPPORT_MSG = (
-    "Our support team is available!\n\n"
-    "- Email: hello@careerg1.app\n"
-    "- Website: https://careerg1.app\n\n"
+    "Our team is ready to help!\n\n"
+    "- Website: https://antz.ai\n"
+    "- LinkedIn: Antz.ai\n\n"
     "Or just type your question here and we'll get back to you!"
 )
 
@@ -130,26 +133,35 @@ def handle_message(phone: str, message: str) -> str:
     step = conv["step"]
     msg = message.strip().lower()
 
-    # --- Demo booking flow (collecting info) ---
+    # --- Consultation booking flow ---
     if step == "ask_name":
         conv["data"]["name"] = message.strip()
         conv["step"] = "ask_email"
-        return f"Thanks *{message.strip()}*! Now, what's your *email address*?"
+        return f"Thanks *{message.strip()}*! Now, what's your *business email*?"
 
     if step == "ask_email":
         conv["data"]["email"] = message.strip()
-        conv["step"] = "ask_course"
-        return "What *course or career* are you interested in?"
+        conv["step"] = "ask_company"
+        return "What's your *company name*?"
 
-    if step == "ask_course":
-        conv["data"]["course"] = message.strip()
+    if step == "ask_company":
+        conv["data"]["company"] = message.strip()
+        conv["step"] = "ask_challenge"
+        return (
+            "What *business challenge* are you looking to solve with AI?\n\n"
+            "e.g., Process automation, data analysis, customer support, etc."
+        )
+
+    if step == "ask_challenge":
+        conv["data"]["challenge"] = message.strip()
         conv["step"] = "done"
         name = conv["data"].get("name", "")
         email = conv["data"].get("email", "")
-        course = conv["data"].get("course", "")
+        company = conv["data"].get("company", "")
+        challenge = conv["data"].get("challenge", "")
 
         logger.info(
-            f"NEW LEAD: {name} | {email} | {phone} | {course}"
+            f"NEW LEAD: {name} | {email} | {company} | {phone} | {challenge}"
         )
 
         return (
@@ -157,9 +169,11 @@ def handle_message(phone: str, message: str) -> str:
             f"*Your Details:*\n"
             f"- Name: {name}\n"
             f"- Email: {email}\n"
-            f"- Interest: {course}\n\n"
-            "Our team will reach out to you within 24 hours to schedule your free demo.\n\n"
-            "Meanwhile, check out https://careerg1.app\n\n"
+            f"- Company: {company}\n"
+            f"- Challenge: {challenge}\n\n"
+            "Our AI strategy team will reach out within 24 hours "
+            "to schedule your free consultation.\n\n"
+            "Meanwhile, visit https://antz.ai to explore more.\n\n"
             "Type *hi* anytime to start over!"
         )
 
@@ -168,19 +182,19 @@ def handle_message(phone: str, message: str) -> str:
         conv["step"] = "menu"
         return ABOUT_MSG
 
-    if msg in ("2", "features", "feature"):
+    if msg in ("2", "solutions", "features", "services"):
         conv["step"] = "menu"
-        return FEATURES_MSG
+        return SOLUTIONS_MSG
 
-    if msg in ("3", "pricing", "price", "plans"):
+    if msg in ("3", "how", "process", "journey", "how it works"):
         conv["step"] = "menu"
-        return PRICING_MSG
+        return JOURNEY_MSG
 
-    if msg in ("4", "demo", "book", "register", "signup", "sign up"):
+    if msg in ("4", "demo", "book", "consult", "consultation", "register", "signup"):
         conv["step"] = "ask_name"
-        return DEMO_START_MSG
+        return CONSULTATION_START_MSG
 
-    if msg in ("5", "support", "help"):
+    if msg in ("5", "support", "help", "contact", "team"):
         conv["step"] = "menu"
         return SUPPORT_MSG
 
@@ -197,11 +211,11 @@ def handle_message(phone: str, message: str) -> str:
     conv["step"] = "menu"
     return (
         "I didn't quite get that. Please reply with a number:\n\n"
-        "1. About CareerG1\n"
-        "2. Features\n"
-        "3. Pricing\n"
-        "4. Book a Free Demo\n"
-        "5. Support\n\n"
+        "1. About Antz.ai\n"
+        "2. Our Solutions\n"
+        "3. How It Works\n"
+        "4. Book a Free Consultation\n"
+        "5. Talk to Our Team\n\n"
         "Or type *hi* to start over!"
     )
 
@@ -211,7 +225,7 @@ def handle_message(phone: str, message: str) -> str:
 
 @app.get("/")
 async def root():
-    return {"status": "running", "bot": "CareerG1 WhatsApp Bot", "version": "1.0.0"}
+    return {"status": "running", "bot": "Antz.ai WhatsApp Bot", "version": "1.0.0"}
 
 
 @app.get("/health")
@@ -227,11 +241,9 @@ async def webhook(request: Request):
     except Exception:
         return JSONResponse({"error": "invalid json"}, status_code=400)
 
-    # Log event type for debugging
     event = payload.get("event")
     logger.info(f"Webhook event: {event}")
 
-    # Only process incoming messages
     if event != "messages.upsert":
         return {"ignored": True, "reason": f"event={event}"}
 
@@ -240,21 +252,17 @@ async def webhook(request: Request):
         key = data.get("key", {})
         message_data = data.get("message", {})
 
-        # Skip messages sent by the bot itself
         if key.get("fromMe", False):
             return {"ignored": True, "reason": "own message"}
 
-        # Skip status broadcasts
         remote_jid = key.get("remoteJid", "")
         if remote_jid == "status@broadcast":
             return {"ignored": True, "reason": "status broadcast"}
 
-        # Extract phone number
         phone = remote_jid.split("@")[0]
         if not phone:
             return {"ignored": True, "reason": "no phone"}
 
-        # Extract message text (handle different message types)
         text = (
             message_data.get("conversation")
             or message_data.get("extendedTextMessage", {}).get("text")
@@ -262,7 +270,6 @@ async def webhook(request: Request):
         )
 
         if not text:
-            # Handle non-text messages (images, audio, etc.)
             send_message(
                 phone,
                 "I can only read text messages for now. Please type your message!",
@@ -271,7 +278,6 @@ async def webhook(request: Request):
 
         logger.info(f"Message from {phone[:6]}***: {text[:50]}")
 
-        # Process and reply
         reply = handle_message(phone, text)
         send_message(phone, reply)
 
@@ -314,7 +320,7 @@ async def broadcast(request: Request):
 
 @app.get("/leads")
 async def get_leads():
-    """Get all collected leads (demo bookings)."""
+    """Get all collected leads (consultation bookings)."""
     leads = []
     for phone, conv in conversations.items():
         if conv.get("data"):
@@ -324,7 +330,7 @@ async def get_leads():
 
 @app.get("/conversations")
 async def get_conversations():
-    """Get all active conversations (for debugging)."""
+    """Get all active conversations."""
     return {
         "total": len(conversations),
         "conversations": {
