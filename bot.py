@@ -241,10 +241,10 @@ async def webhook(request: Request):
     except Exception:
         return JSONResponse({"error": "invalid json"}, status_code=400)
 
-    event = payload.get("event")
+    event = payload.get("event","")
     logger.info(f"Webhook event: {event}")
 
-    if event != "messages.upsert":
+    if event.lower().replace("_", ".") != "messages.upsert":
         return {"ignored": True, "reason": f"event={event}"}
 
     try:
